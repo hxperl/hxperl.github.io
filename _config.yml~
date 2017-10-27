@@ -1,12 +1,12 @@
 # Site settings
-title: My personal blog
-email: hxperl@gmail.com
+title: Jekyll Doc Theme
+email: your-email@domain.com
 description: >
   Jekyll Template for Project Websites
   providing documentation and blog post pages.
 
-baseurl: "/" # the subpath of your site, e.g. /blog/
-url: https://hxperl.github.io# the base hostname & protocol for your site
+baseurl: "/jekyll-doc-theme" # the subpath of your site, e.g. /blog/
+url: https://aksakalli.github.io/jekyll-doc-theme # the base hostname & protocol for your site
 git_address: https://github.com/aksakalli/jekyll-doc-theme
 git_edit_address: https://github.com/aksakalli/jekyll-doc-theme/blob/gh-pages
 
@@ -29,7 +29,7 @@ exclude:
   - .idea/
   - .gitignore
   - README.md
-timezone: Asia/Seoul
+timezone: Europe/Berlin
 defaults:
 - scope:
     path: _posts
