@@ -1,5 +1,5 @@
 ---
-title: About Python
+title: Python
 permalink: /docs/python/
 ---
 
