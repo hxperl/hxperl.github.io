@@ -3,9 +3,6 @@ title: About Python
 permalink: /docs/python/
 ---
 
-[TOC]
-
-
 
 ### 1. 개요
 
