@@ -1,3 +1,8 @@
+---
+title: About Python
+permalink: /docs/python/
+---
+
 # Python
 
 [TOC]
