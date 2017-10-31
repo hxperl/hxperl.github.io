@@ -1,6 +1,6 @@
 ---
-title: ChromeV8
-permalink: /docs/V8/
+title: Nodejs
+permalink: /docs/nodejs/
 ---
 
 ### 1. 개요
