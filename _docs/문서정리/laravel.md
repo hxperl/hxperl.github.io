@@ -32,3 +32,29 @@ PHP 프레임워크 Laravel
 ### 3. 단점
 
 - 속도가 느림
+
+### 4. 프로젝트 생성
+
+##### Prerequisite
+
+- php-mbstring
+- php-xml
+
+##### composer로 프로젝트 생성
+
+```shell
+composer create-project laravel/laravel --prefer-dist
+```
+
+### 5. 설정
+
+##### .env 파일
+
+APP_KEY 설정을 해주고
+
+laravel 프로젝트 루트 디렉토리에서 아래 명령어 실행
+
+```php
+php artisan key:generate
+```
+
