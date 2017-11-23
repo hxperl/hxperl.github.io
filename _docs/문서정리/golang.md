@@ -1,4 +1,7 @@
-# Go 언어
+---
+title: Go lang
+permalink: /docs/golang/
+---
 
 ### 1. 개요
 

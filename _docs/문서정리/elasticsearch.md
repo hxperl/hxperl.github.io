@@ -1,4 +1,7 @@
-# Elasticsearch
+---
+title: Elasticsearch
+permalink: /docs/elasticsearch/
+---
 
 ### 1. 개요
 
