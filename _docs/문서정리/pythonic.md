@@ -1,3 +1,8 @@
+---
+title: Pythonic
+permalink: /docs/pythonic/
+---
+
 ### 1. 철학과 개념
 
 Pythonic의 사전적 정의는 관습적으로 사용되는 파이썬의 사용방법이다.
