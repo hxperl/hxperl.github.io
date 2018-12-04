@@ -109,3 +109,38 @@ def greeting(name):
 ###### 1.2.3 Higher-Order Function
 
 first-class function과 유사한 개념으로 고차 함수라고 주로 표현. 함수가 매개변수로 전달되거나, 함수를 반환값으로 사용할 때 higher-order function 이라고 한다.
+
+
+
+###### 1.2.4 Nested Function
+
+내부의 함수들이 scope chain에 의해서 자신을 감싸고 있는 외부 함수의 메모리에 접근 가능. 정확하게는 외부 함수의 메모리를 복사해서 가지고 있다. LEGB규칙 중 enclosed에 해당.
+
+
+
+###### 1.2.5 Closure
+
+사전적 정의: first-class function을 지원하는 언어에서 유효 범위의 이름을 바인딩하는 기술.
+
+함수와 함수가 사용하는 환경(nonlocal 변수들)을 저장하는 것이라고 할수 있음. 클로저는 내부 함수를 반환하지만 이때 이 함수와 관련된 환경을 따로 저장하고 있어 반환된 내부 함수에서 이 자원들을 사용할 수 있다.
+
+
+
+###### 1.2.6 Closure의 사용
+
+1. *global* 변수를 사용하고 싶지 않을때. (*nonlocal* 변수가 대신하기 때문이다.)
+2. 클래스를 사용하지 않기 위해. (클래스로 만드는 것보다 함수로 만드는것이 그리고 클로저로 구현하는 것이 효율적일 수 있다.)
+3. *decorator* 를 사용하기 위해. (어떤 함수를 실행하기 전이나 실행하고 난 뒤에 특정 기능을 수행하기 위한 기능)
+
+
+
+###### 1.2.7 Partial Application
+
+매개변수의 일부를 미리 전달해서 래핑(wrapping) 함수를 만들고 이 래핑된 함수를 사용해 가변적인 매개변수만 매개변수로 사용하는 기법. 기본적으로 higher-order function 속성을 이용한다.
+
+
+
+###### 1.2.8 *args와 **kwargs
+
+*args는 non-keyworded 가변 인자를 다루고, **kwargs는 keyworded 가변 인자를 다룬다.
+

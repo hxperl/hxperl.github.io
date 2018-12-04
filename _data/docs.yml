@@ -13,6 +13,7 @@
 - title: 문서정리
   docs:
   - python
+  - pythonic
   - flask
   - javascript
   - laravel
