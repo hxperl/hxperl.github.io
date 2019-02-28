@@ -140,5 +140,220 @@ If you work with *RxSwift* or *Rx* in general, you should get to know **Marble D
 
 ### 4. Transformations
 
+Sometimes you want to transform, combine or filter the elements emitted by an observable sequence before the subscriber receives them.
 
+##### 4.1 Map
 
+To transform Elements emitted from an observable Sequence, before they reach their subscribers, you use the **map** operator. Imagine a transformation that multiples each value of a sequence with 10 before emitting.
+
+![map](https://hxperl.github.io/img/1_2h-T4aCgN8eK_86_YbdoRQ.png)
+
+```swift
+Observable<Int>.of(1,2,3,4).map { value in
+    return value * 10
+}.subscribe(onNext: {
+    print($0)
+})
+
+OUTPUT: 10 20 30 40
+```
+
+##### 4.2 FlatMap
+
+Imagine an Observable Sequence that consists of objects that are themselves Observables and you want to create new Sequence from those. This is where *FlatMap* comes into play. *FlatMap* merges the emission of these resulting Observables and emitting these merged results as its own sequence.
+
+![flatmap](https://hxperl.github.io/img/1_pn9jILzX6bjYB562L3qR-g.png)
+
+```swift
+let sequence1 = Observable<Int>.of(1,2)
+let sequence2 = Observable<Int>.of(1,2)
+
+let sequenceOfSequences = Observable.of(sequence1, sequence2)
+
+sequenceOfSequences.flatMap { return $0 }.subscribe(onNext: {
+    print($0)
+})
+
+OUTPUT: 1 2 1 2
+```
+
+##### 4.3 Scan
+
+Scan starts with an initial seed value and is used to aggregate values just like reduce in Swift.
+
+![scan](https://hxperl.github.io/img/1_EM6Goaram46b3JzvptJhhw.png)
+
+```swift
+Observable.of(1,2,3,4,5).scan(0) { seed, value in
+    return seed + value
+}.subscribe(onNext: {
+    print($0)
+})
+
+OUTPUT: 1 3 6 10 15
+```
+
+##### 4.4 Buffer
+
+The Buffer operator transforms an Observable that emits items into an Observable that emits buffered collections of those items.
+
+![buffer](https://hxperl.github.io/img/1_dsOCThMOM5DR-Pn8AX3dTw.png)
+
+```swift
+SequenceThatEmitsWithDifferentIntervals
+    .buffer(timeSpan: 150, count: 3, scheduler:s)
+    .subscribe(onNext: {
+        print($0)
+    })
+
+OUTPUT: [1] [2,3] [4] [5,6] [7] []
+```
+
+### 5. Filter
+
+If you only want to react on next events based on certain criteria you should use a filter operator.
+
+##### 5.1 Filter
+
+The Basic filter Operation works similar to the swift equivalent. You just define a condition that needs to be passed and if the condition is fulfilled a *.next event* will be emitted to its subscribers.
+
+![filter](https://hxperl.github.io/img/1_33huMkgG4HjdBKoKwMaTpQ.png)
+
+```swift
+Observable.of(2,30,22,5,60,1).filter{$0 > 10}.subscribe(onNext: {
+    print($0)
+})
+
+OUTPUT: 30 22 60
+```
+
+##### 5.2 DistinctUntilChanged
+
+If you just want to emit next Events if the values changed from previous ones you need to use distinctUntilChanged.
+
+![distinctuntilchanged](https://hxperl.github.io/img/1_jZI0i4_XbT_YVnR-mz-Aaw.png)
+
+```swift
+Observable.of(1,2,2,1,3).distinctUntilChanged().subscribe(onNext: {
+    print($0)
+})
+
+OUTPUT : 1 2 1 3
+```
+
+Other filter operators you should try:
+
+- Debounce
+- TakeDuration
+- Skip
+
+### 6. Combine
+
+Combining sequence is a common Task. *RxSwift* provides a lot of operators for you.
+
+##### 6.1 StartWith
+
+If you want an Observable to emit a specific sequence of items before it begins emitting the items normally expected from it, use the *startWith* operator.
+
+![startwith](https://hxperl.github.io/img/1_r8JwfAjyrvJKM0PqchNiXg.png)
+
+```swift
+Observable.of(2,3).startWith(1).subscribe(onNext: {
+    print($0)
+})
+
+OUTPUT: 1 2 3
+```
+
+##### 6.2 Merge
+
+You can combine the output of multiple Observables so that they act like a single Observable, by using the *Merge* operator.
+
+![merge](https://hxperl.github.io/img/1_ARwzMPTFUptBXSyuv1THTA.png)
+
+```swift
+let publish1 = PublishSubject<Int>()
+let publish2 = PublishSubject<Int>()
+
+Observable.of(publish1, publish2).merge().subscribe(onNext: {
+    print($0)
+})
+
+publish1.onNext(20)
+publish1.onNext(40)
+publish1.onNext(60)
+publish2.onNext(1)
+publish1.onNext(80)
+publish2.onNext(2)
+publish1.onNext(100)
+
+OUTPUT: 20 40 60 1 80 2 100
+```
+
+##### 6.3 Zip
+
+You use the **Zip** method if you want to merge items emitted by different observable sequences to one observable sequence. **Zip** will operate in strict sequence, so the first two elements emitted by *Zip* will be the first element of the first sequence and the first elemnet of the second sequence combined. Keep also in mind that *Zip* will only emit as many items as the number of items emitted of the source Observables that emits the fewest items.
+
+![zip](https://hxperl.github.io/img/1_ddPtQlF3uI6PwBbCG-rhcw.png)
+
+```swift
+let a = Observable.of(1,2,3,4,5)
+let b = Observable.of("a","b","c","d")
+
+Observable.zip(a,b){ return ($0,$1) }.subscribe {
+    print($0)
+}
+
+OUTPUT: (1,"a") (2,"b") (3,"c") (4,"d")
+```
+
+Other combination filters you should try:
+- Concat
+- CombineLatest
+- SwitchLatests
+
+### 7. Side Effects
+
+If you want register callbacks that will be executed when certain events take place on an Observable Sequence you need to use the **doOn** Operator. It will not modify the emitted elements but rather just pass them through.
+
+- **do(onNext:)** - if you want to do something just if a *next* event happend
+- **do(onError:)** - if errors will be emitted and
+- **do(onCompleted:)** - if the sequence finished successfully.
+
+```swift
+Observable.of(1,2,3,4,5).do(onNext: {
+    $0 * 10
+}).subscribe(onNext: {
+    print($0)
+})
+```
+
+### 8. Schedulers
+
+Operators will work on the same thread as where the subscription is created. In RxSwift you use schedulers to force operators do their work on a specific queue. You can also force that the subscription should happen on a specific Queue. You use *subscribeOn* and *observeOn* for those tasks. If you are familiar with the concept of operation-queues or dispatch-queues this should be nothing special for you. A scheduler can be serial or concurrent similar to GCD or OperationQueue. There are 5 types of Schedulers in RxSwift:
+
+- **MainScheduler** - Abstracts work that needs to be performed on MainThread. In case schedule methods are called from the main thread, it will perform the action immediately without scheduling.This scheduler is usually used to perform UI work.
+- **CurrentThreadScheduler** - Schedules units of work on the current thread. This is the default scheduler for operators that generate elements.
+- **SerialDispatchScheduler** - Abstracts the work that needs to be performed on a specific dispatch_queue_t. It will make sure that even if a concurrent dispatch queue is passed, it's transformed into a serial one.Serial schedulers enable certain optimizations for observeOn.The main scheduler is an instance of SerialDispatchQueueScheduler
+- **ConcurrentDispatchQueueScheduler** - Abstracts the work that needs to be performed on a specific dispatch_queue_t. You can also pass a serial dispatch queue, it shouldn't cause any problems. This scheduler is suitable when some work needs to be performed in the background.
+- **OperationQueueScheduler** - Abstracts the work that needs to be performed on a specific NSOperationQueue. This scheduler is suitable for cases when there is some bigger chunk of work that needs to be performed in the background and you want to fine tune concurrent processing using maxConcurrentOperationCount.
+
+```swift
+let publish1 = PublishSubject<Int>()
+let publish2 = PublishSubject<Int>()
+
+let concurrentScheduler = ConcurrentDispatchQueueScheduler(qos: .background)
+
+Observable.of(publish1,publish2)
+          .observeOn(concurrentScheduler)
+          .merge()
+          .subscribeOn(MainScheduler())
+          .subscribe(onNext:{
+    print($0)
+})
+
+publish1.onNext(20)
+publish1.onNext(40)
+
+OUTPUT: 20 40 
+```
