@@ -136,7 +136,7 @@ If you kept up reading to this point you should know the basics of *RxSwift*. Th
 
 If you work with *RxSwift* or *Rx* in general, you should get to know **Marble Diagrams**. A **Marble Diagram* visualizes the transformation of an observable sequence. It consists of the input stream on top, the output stream at the bottom and the actual transformation function in the middle.
 
-!(https://hxperl.github.io/img/1_y7RxhZJnOWkgW42jzT8JlQ.png)
+![marble diagram](https://hxperl.github.io/img/1_y7RxhZJnOWkgW42jzT8JlQ.png)
 
 ### 4. Transformations
 
