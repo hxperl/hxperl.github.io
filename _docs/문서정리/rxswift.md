@@ -175,3 +175,276 @@ range()
 
 subscription에 dispose bag 을 추가하면 bag 안에 이러한 subscription들이 저장된다.
 그리고 bag 변수가 deallocate 되면 모든 subscription 들을 dispose 한다.
+
+### 4. Side Effects
+
+Side effect는 기본적으로 Observable events들에 영향을 주지 않고 작업을 수행하는 것이다.
+
+##### 4.1 Do
+
+```swift
+let rangeObserver = Observable.ragne(start: 1, count: 4)
+
+rangeObserver.do(
+    onNext: { print("Will next", $0) },
+    onError: nil,
+    onCompleted: { print("Will Complete Range") },
+    onSubscribe: { print("Will Subscribe") },
+    onSubscribed: { print("Did Subscribe") },
+    onDispose: { print("Did dispose subscription") }
+    ).subscribe()
+```
+
+주로 디버깅에 사용된다.
+
+##### 4.2 Debug
+
+```swift
+rangeObserver.debug("Range Debug", trimOutput: true).subscribe(onNext:, onError:, onCompleted:, onDisposed:)
+```
+
+디버깅할 때 유용.
+
+### 5. Traits
+
+- Singles
+    - Success with value followed by Completed
+    - Error
+- Completable
+    - Completed
+    - Error
+- Maybe
+    - Success with value
+    - Completed
+    - Error
+
+##### 5.1 Single
+
+RxJava는 Observable 변형 인 *Single*을 개발했다.
+Single은 Observable과 같은 것이지만 일련의 값을 내보내는 대신 항상 하나의 값 또는 오류를 내보낸다.
+이러한 이유 때문에 Observable에서 세 가지 메소드(onNext, onError 및 onCompleted) 대신 Single에서는 두 가지 메소드만 사용한다.
+- onSuccess
+- onError
+
+### 6. Subjects
+
+##### 6.1 Publish Subject
+
+PublishSubject는 구독 이후에 방출 된 항목들만을 Observer에게 방출한다.
+
+##### 6.2 Behavior Subject
+
+BehaviorSubject는 Observable 소스에서 가장 최근에 방출 된 항목 또는 아직 방사되지 않은 경우 시드(기본값)를 방출 한 다음 소스에서 나중에 방출되는 다른 항목을 계속 방출한다.
+
+```swift
+let subject = BehaviorSubject(value: "Initial value")
+```
+
+##### 6.3 Replay Subject
+
+ReplaySubject는 subscription 시기와 관계없이 소스 Observable에서 방출한 값들을 버퍼에 유지하고 그 버퍼를 구독중인 모든 Observer에게 방출한다.
+임의로 버퍼 사이즈를 지정할 수 있다.
+ReplaySubject를 옵저버로 사용하는 경우 onNext 메서드를 여러 스레드에서 호출하지 않도록 주의해야한다.
+
+```swift
+let subject = ReplaySubject<String>.create(bufferSize: 2)
+```
+
+##### 6.4 Async Subject
+
+AsyncSubject는 Observable 소스가 방출 한 마지막 값을 보내고 완료한다. 완료되기 전까진 아무런 값도 보내지 않는다.
+
+
+### 7. Relay
+
+Relay는 Subject와 유사하지만 두 가지 다른 점이 있다.
+1. 완료 되지 않음
+2. 에러를 보내지 않음
+
+### 8. Ignore Operator
+
+Observable에서 어떤 항목도 방출하지 않고 종료 통지만 반영된다.
+
+```swift
+let progress = PublishSubject<Float>()
+
+progress.ignoreElements().subscribe({ print($0) })
+
+progress.onNext(0.2)
+
+progress.onNext(0.6)
+
+progress.onNext(0.9)
+
+progress.onCompleted()
+
+output:
+completed
+```
+
+임의 갯수 만큼 무시
+```swift
+let login = PublishSubject<String>()
+
+login.elementAt(2).subscribe( { print($0) } )
+
+login.onNext("One") // ignore
+
+login.onNext("Two") // ignore
+
+login.onNext("Three") // 3번째 출력이후 자동 완료 된다.
+
+login.onNext("Four")
+
+output:
+next(Three)
+completed
+```
+
+### 9. Skip Operator
+
+##### 9.1 skip
+
+```swift
+Observable.from(Array(1...10)).skip(7).subscribe({ print($0) } )
+
+output:
+next(8)
+next(9)
+next(10)
+completed
+```
+
+##### 9.2 skipWhile
+
+```swift
+Observable.from([2, 4, 6, 7, 8, 9]).skipWhile({ $0 % 2 == 0 }).subscribe({ print($0) } )
+
+output:
+next(7)
+next(9)
+next(9)
+completed
+```
+
+##### 9.3 skipUntil
+
+```swift
+let subject = PublishSubject<Int>()
+
+let trigger = PublishSubject<Void>()
+
+subject.skipUntil(trigger).subscribe({ print($0) })
+
+subject.onNext(1)
+
+subject.onNext(2)
+
+trigger.onNext(()))
+
+subject.onNext(3)
+
+subject.onNext(4)
+
+output:
+next(3)
+next(4)
+```
+
+### 10. Take Operator
+
+Skip opertor 의 반대
+
+##### 10.1 take
+
+```swift
+Observable.from(Array(0...10)).take(4).subscribe({print($0)})
+
+output:
+next(0)
+next(1)
+next(2)
+next(3)
+completed
+```
+
+##### 10.2 takeWhile
+
+```swift
+Observable.from([2, 4, 6, 7, 8, 9]).takeWhile({ $0 % 2 == 0 } ).subscribe( { print($0) } )
+
+output:
+next(2)
+next(4)
+next(6)
+completed
+```
+
+##### 10.3 takeUntil
+
+```swift
+let subject = PublishSubject<Int>()
+
+let trigger = PublishSubject<Void>()
+
+subject.takeUntil(trigger).subscribe({ print($0) })
+
+subject.onNext(1)
+
+subject.onNext(2)
+
+trigger.onNext(())
+
+subject.onNext(3)
+
+subject.onNext(4)
+
+output:
+next(1)
+next(2)
+completed
+```
+
+### 11. Distinct Operator
+
+##### 11.1 distinctUntilChanged
+
+각 element가 이전 element와 구별 되어야함.
+
+```swift
+Observable.from([0, 0, 1, 1, 1, 2, 3, 3, 3, 3]).distinctUntilChanged().subscribe({ print($0) })
+
+output:
+next(0)
+next(1)
+next(2)
+next(3)
+completed
+```
+
+##### 11.2 custom
+
+```swift
+Observable.from([0, 1, 0, 2, 1, 0, 3, 2, 0, 4]).distinctUntilChanged { (first, second) -> Bool in
+    return first > second // false 인 경우에 방출
+}.subscribe({ print($0) })
+
+output:
+next(0)
+next(1)
+next(2)
+next(3)
+next(4)
+completed
+```
+
+### 12. Share Operator
+
+하나의 Observable에 대한 모든 subscriber가 같은 값을 전달 받아야 하는 경우.
+
+```swift
+let observable = Observable<Int>.create{ ... }.share(replay:, scope:)
+```
+
+share Observable 에서 임의로 onCompleted를 호출하지 않도록 해야한다.
+
