@@ -22,7 +22,7 @@ let multiObservable = Observable.of(1, 2, 3, 4)
 ```
 1 부터 4까지 차례대로 방출한다.
 
-###### 1.3 From
+##### 1.3 From
 
 다른 객체나 데이터 구조를 Observable로 변환.
 
