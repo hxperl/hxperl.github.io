@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Multi Threading"
+title:  "UIImage vs CGImage vs CIImage"
 date:   2019-05-11 23:38:09
 author: hxperl
 ---
