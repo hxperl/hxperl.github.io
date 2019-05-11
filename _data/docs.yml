@@ -27,6 +27,7 @@
   - iptables
   - restfulapi
   - soap
+  - rpc
   - mvc
   - mvp
   - mvvm
