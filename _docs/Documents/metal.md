@@ -212,3 +212,87 @@ Set the pipeline state object of the pipeline you want the command to execute. T
 [computeEncoder setBuffer:_mBufferResult offset:0 atIndex:2];
 ```
 
+You also specify an offset for each argument. An offset of 0 means the command will access the data from the beginning of a buffer. However, you could use one buffer to store multiple arguments, specifying an offset for each argument.
+
+You don't specify any data for the index argument because the add_arrays function defined its values as being provided by the GPU.
+
+#### Specify Thread Count and Organiztion
+
+Next, decide how many threads to create and how to organize those threads. Metal can create 1D, 2D, or 3D grids. The add_arrays function uses a 1D array, so the sample creates a 1D grid of size (dataSize x 1 x 1), from which Metal generates indices between 0 and dataSize-1.
+
+```objc
+MTLSize gridSize = MTLSizeMake(arrayLength, 1, 1);
+```
+
+#### Specify Threadgroup Size
+
+Metal subdivices the grid into smaller grids called *threadgroups*. Each threadgroup is calculated separately. Metal can dispatch threadgroups to different processing elements on the GPU to speed up processing. You also need to decide how large to make the threadgroups for your command.
+
+```objc
+NSUInteger threadGroupSize = _mAddFunctionPSO.maxTotalThreadsPerThreadgroup;
+if (threadGroupSize > arrayLength)
+{
+    threadGroupSize = arrayLength;
+}
+MTLSize threadgroupSize = MTLSizeMake(threadGroupSize, 1, 1);
+```
+
+The app asks the pipeline state object for the largest possible threadgroup and shrinks it if that size is larger than the size of the data set. The maxTotalThreadsPerThreadgroup property gives the maximum number of threads allowed in the threadgroup, which varies depending on the complexity of the function used to create the pipeline state object.
+
+#### Encode the Compute Command to Execute the Threads
+
+Finally, encode the command to dispatch the grid of threads
+
+```objc
+[computeEncoder dispatchThreads:gridSize threadsPerThreadgroup:threadgroupSize];
+```
+
+When the GPU executes this command, it uses the state you previously set and command's parameters to dispatch threads to perform the computation.
+
+You can follow the same steps using the encoder to encode multiple compute commands into the compute pass without performing any redundant stps. For example, you might set the pipeline state object once, and then set arguments and encode a command for each collection of buffers to process.
+
+#### End the Compute Pass
+
+When you have no more commands to add the compute pass, you end the encoding process to close out the compute pass.
+
+```objc
+[computeEncoder endEncoding];
+```
+
+#### Commit the Command Buffer to Execute Its Commands
+
+Run the commands in the command buffer by committing the command buffer to the queue.
+
+```objc
+[commandBuffer commit];
+```
+
+The command queue created the command buffer, so committing the buffer always places it on that queue. After you commit the command buffer, Metal asynchronously prepares the commands for execution and then schedules the command buffer to execute on the GPU. After the CPU executes all the commands in the command buffer, Metal marks the command buffer as complete.
+
+#### Wait for the Calculation to Complete
+
+Your app can do other work while the GPU is processing your commands. This sample doesn't need to do any additional work, so it simply waits until the command buffer is complete.
+
+```objc
+[commandBuffer waitUntilCompleted];
+```
+
+Alternatively, to be notified when Metal has processed all of the commands, add a completion handler to the command buffer (addCompletedHandler(_:)), or check the status of a command buffer by reading its status property.
+
+#### Read the Results From the Buffer
+
+After the command buffer completes, the GPU's calculations are stored in the output buffer and Metal performs any necessary steps to make sure the CPU can see them. In a real app, you would read the results from the buffer and do something with them, such as displaying the results onscreen or writing them to a file. Because the calculations are only used to illustrate the process of creating a Metal app, the sample reads the values stored in the output buffer and tests to make sure the CPU and the GPU calculated the same results.
+
+```objc
+- (void) verifyResults
+{
+    float* a = _mBufferA.contents;
+    float* b = _mBufferB.contents;
+    float* result = _mBufferResult.contents;
+
+    for ( unsigned long index = 0; index < arrayLength; index ++)
+    {
+        assert(result[index] == a[index] + b[index]);
+    }
+}
+```
