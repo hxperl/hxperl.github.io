@@ -5,7 +5,7 @@ permalink: /docs/metal/
 
 Render advanced 3D graphics and perform data-parallel computations using graphics processors.
 
-### Overview
+## Overview
 
 Graphics processros (GPU) are designed to quickly render graphics and perform data-parallel calculations. Use the Metal framework when you need to communicate directly with the GPUs available on a device. Apps that render complex scenes or that perform advanced scientific calculations can use this power to achieve maximum performance. Such apps include:
 
@@ -16,9 +16,9 @@ Graphics processros (GPU) are designed to quickly render graphics and perform da
 Metal works hand-in-hand with other frameworks that supplement its capability. Use *MetalKit* to simplify the task of getting your Metal content onscreen. Use *Metal Performance Shaders* to implement custom rendering functions or to take advantage of a large library of existing functions.
 Many high level Apple frameworks are built on top of Metal to take advantage of its performance, including *Core Image*, *SpriteKit* and *SceneKit*. Using one of these high-level frameworks shields you from the details of GPU programming, but writing custom Metal code enables you to achieve the highest level of performance. 
 
-### Basic Tasks
+## Basic Tasks
 
-##### Performing Calculations on GPU
+### Performing Calculations on GPU
 
 - Converting a simple function written in C to Metal Shading Language (MSL), so that it can be run on a GPU
 - Finding a GPU
@@ -27,7 +27,7 @@ Many high level Apple frameworks are built on top of Metal to take advantage of 
 - Creating a command buffer and encoding GPU commands to manipulate the data
 - Committing the buffer to a command queue to make the GPU execute the encoded commands
 
-###### Write a GPU Function to Perform Calculations
+#### Write a GPU Function to Perform Calculations
 
 To illustrate GPU programming, this app adds corresponding elements of two arrays together, writing the results to a third array. Listing 1 shows a function tht performs this calculation on the CPU, written in C. it loops over the index, calculating one value per iteration of the loop.
 
@@ -70,7 +70,7 @@ Listing 2 removes the for-loop from Listing 1, because the function is now going
 
 To replace the index previously provided by the for-loop, the function takes a new index argument, with another MSL keyword, *thread_position_in_grid*, specified using C++ attribute syntax. This keyword declares that Metal should calculate a unique index for each thread and pass that index in this argument. Because add_arrays uses a 1D grid, the index is defined as a scalar integer. Even though the loop was removed, Listing 1 and Listing 2 use the same line of code to add the two numbers together. If you want to convert similar code from C or C++ to MSL, replace the loop logic with a grid in the same way.
 
-###### Find a GPU
+#### Find a GPU
 
 In your app, a *MTLDevice* object is a thin abstraction for a GPU; you use it to communicate with a GPU. Metal creates a MTLDevice for each GPU. You get the default device object by calling *MTLCreateSystemDefaultDevice()*. 
 
@@ -78,7 +78,7 @@ In your app, a *MTLDevice* object is a thin abstraction for a GPU; you use it to
 id<MTLDevice> device = MTLCreateSystemDefaultDevice();
 ```
 
-###### Initialize Metal Objects
+#### Initialize Metal Objects
 
 Metal represents other GPU-related entities, like compiled shaders, memory buffers and textures, as objects. To create these GPU-specific objects, you call methods on a MTLDevice or you call methods on objects created by a MTLDevice. All objects created directly or indirectly by a device object are usable only with that device object. Apps that use multiple GPUs will use multiple device objects and create a similar hierarchy of Metal objects for each.
 
@@ -90,7 +90,7 @@ MetalAdder* adder = [[MetalAdder alloc] initWithDevice:device];
 
 In Metal, expensive initialization tasks can be run once and the results retained and used inexpensively. You rarely need to run such tasks in performance-sensitive code.
 
-###### Get a Reference to the Metal Function
+#### Get a Reference to the Metal Function
 
 The first thing the initializer does is load the function and prepare it to run on the GPU. When you build the app, Xcode compiles the *add_arrays* function and adds it to a default Metal library that it embeds in the app. You use *MTLLibrary* and *MTLFunction* objects to get information about Metal libraries and the functions contained in them. To get an object representing the *add_arrays* function, ask the MTLDevice to create a MTLLibrary object for the default library, and then ask the library for a MTLFunction object that represents the shader function.
 
@@ -123,7 +123,7 @@ The first thing the initializer does is load the function and prepare it to run 
 }
 ```
 
-###### Prepare a Metal Pipeline
+#### Prepare a Metal Pipeline
 
 The function object is a proxy for the MSL function, but it's not executable code. You convert the function into executable code by creating a *pipeline*. A pipeline specifies the steps that the GPU performs to complete a specific task. In Metal, a pipeline is represented by a *pipeline state object*. Because this sample uses a compute function, the app creates a MTLComputePipelineState object.
 
@@ -136,9 +136,9 @@ A compute pipeline runs a single compute function, optionally manipulating the i
 When you create a pipeline state object, the device object finishes compiling the function for this specific GPU. This sample creates the pipeline state object synchronously and returns it directly to the app. Because compiling does take a while, avoid creating pipeline state objects synchronously in performance-sensitive code.
 
 > **Note**
-> All of the objects returned by Metal in the code you've seen so far are returned as objects that conform to protocols. Metal defines most GPU-specific objects using protocols to abstract away the underlying implementation classes, which may vary for different GPUs. Metal defines GPU-independent objects using classes. The reference documentation for any given Metal protocol make it clear whether you can implement that protocol in your app.
+>> All of the objects returned by Metal in the code you've seen so far are returned as objects that conform to protocols. Metal defines most GPU-specific objects using protocols to abstract away the underlying implementation classes, which may vary for different GPUs. Metal defines GPU-independent objects using classes. The reference documentation for any given Metal protocol make it clear whether you can implement that protocol in your app.
 
-###### Create a Command Queue
+#### Create a Command Queue
 
 To send work to the GPU, you need a command queue. Metal uses command queues to schedule commands. Create a command queue by asking the MTLDevice for one.
 
@@ -146,7 +146,7 @@ To send work to the GPU, you need a command queue. Metal uses command queues to 
 _mCommandQueue = [_mDevice newCommandQueue];
 ```
 
-###### Create Data Buffers and Load Data
+#### Create Data Buffers and Load Data
 
 After initializing the basic Metal objects, you load data for the GPU to execute. This task is less performance critical, but still useful to do early in your app's launch.
 
@@ -181,7 +181,7 @@ To fill a buffer with random data, the app gets a pointer to the buffer's memory
 }
 ```
 
-###### Create a Command Buffer
+#### Create a Command Buffer
 
 Ask the command queue to create a command buffer.
 
@@ -189,7 +189,7 @@ Ask the command queue to create a command buffer.
 id<MTLCommandBuffer> commandBuffer = [_mCommandQueue commandBuffer];
 ```
 
-###### Create a Command Encoder
+#### Create a Command Encoder
 
 To write commands into a command buffer, you use a *command encoder* for the specific kind of commands you want to code. This sample creates a compute command encoder, which encodes a compute pass. A compute pass holds a list of commands that execute compute pipelines. Each compute command causes the GPU to create a grid of threads to execute on the GPU.
 
@@ -201,7 +201,7 @@ To encode a command, you make a series of method calls on the encoder. Some meth
 
 ![](https://docs-assets.developer.apple.com/published/064ba03feb/1516649f-a760-4bae-bee5-9bb1996ff42e.png)
 
-###### Set Pipeline State and Argument Data
+#### Set Pipeline State and Argument Data
 
 Set the pipeline state object of the pipeline you want the command to execute. Then set data for any arguments that the pipeline needs to send into the add_array function. For this pipeline, that means providing references to three buffers. Metal automatically assigns indices for the buffer arguments in the order that the arguments appear in the function declaration in Listing 2, starting with 0. You provide arguments using the same indices.
 
