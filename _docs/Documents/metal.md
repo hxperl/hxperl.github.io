@@ -199,5 +199,16 @@ id<MTLComputeCommandEncoder> computeEncoder = [commandBuffer computeCommandEncod
 
 To encode a command, you make a series of method calls on the encoder. Some methods set state information, like the pipeline state object (PSO) or the arguments to be passed to the pipeline. After you make those state changes, you encode a command to execute the pipeline. The encoder writes all of the state changes and command parameters into the command buffer.
 
-!(https://docs-assets.developer.apple.com/published/064ba03feb/1516649f-a760-4bae-bee5-9bb1996ff42e.png)
+![](https://docs-assets.developer.apple.com/published/064ba03feb/1516649f-a760-4bae-bee5-9bb1996ff42e.png)
+
+###### Set Pipeline State and Argument Data
+
+Set the pipeline state object of the pipeline you want the command to execute. Then set data for any arguments that the pipeline needs to send into the add_array function. For this pipeline, that means providing references to three buffers. Metal automatically assigns indices for the buffer arguments in the order that the arguments appear in the function declaration in Listing 2, starting with 0. You provide arguments using the same indices.
+
+```objective-c
+[computeEncoder setComputePipelineState:_mAddFunctionPSO];
+[computeEncoder setBuffer:_mBufferA offset:0 atIndex:0];
+[computeEncoder setBuffer:_mBufferB offset:0 atIndex:1];
+[computeEncoder setBuffer:_mBufferResult offset:0 atIndex:2];
+```
 
