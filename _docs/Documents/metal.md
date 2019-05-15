@@ -3,8 +3,6 @@ title: Metal
 permalink: /docs/metal/
 ---
 
-# Metal
-
 Render advanced 3D graphics and perform data-parallel computations using graphics processors.
 
 ### Overview
@@ -76,7 +74,7 @@ To replace the index previously provided by the for-loop, the function takes a n
 
 In your app, a *MTLDevice* object is a thin abstraction for a GPU; you use it to communicate with a GPU. Metal creates a MTLDevice for each GPU. You get the default device object by calling *MTLCreateSystemDefaultDevice()*. 
 
-```c++
+```objective-c
 id<MTLDevice> device = MTLCreateSystemDefaultDevice();
 ```
 
@@ -86,7 +84,7 @@ Metal represents other GPU-related entities, like compiled shaders, memory buffe
 
 The sample app uses a custom MetalAdder class to manage the objects it needs to communicate with the GPU. The class's initializer creates these objects and stores them in its proprties. The app creates an instance of this class, passing in the Metal device object to use to create the secondary objects. The MetalAdder object keeps strong references to the Metal objects until it finishes executing.
 
-```c++
+```objective-c
 MetalAdder* adder = [[MetalAdder alloc] initWithDevice:device];
 ```
 
@@ -96,7 +94,7 @@ In Metal, expensive initialization tasks can be run once and the results retaine
 
 The first thing the initializer does is load the function and prepare it to run on the GPU. When you build the app, Xcode compiles the *add_arrays* function and adds it to a default Metal library that it embeds in the app. You use *MTLLibrary* and *MTLFunction* objects to get information about Metal libraries and the functions contained in them. To get an object representing the *add_arrays* function, ask the MTLDevice to create a MTLLibrary object for the default library, and then ask the library for a MTLFunction object that represents the shader function.
 
-```c++
+```objective-c
 - (instancetype) initWithDevice: (id<MTLDevice>) device
 {
     self = [super init];
@@ -129,7 +127,7 @@ The first thing the initializer does is load the function and prepare it to run 
 
 The function object is a proxy for the MSL function, but it's not executable code. You convert the function into executable code by creating a *pipeline*. A pipeline specifies the steps that the GPU performs to complete a specific task. In Metal, a pipeline is represented by a *pipeline state object*. Because this sample uses a compute function, the app creates a MTLComputePipelineState object.
 
-```c++
+```objective-c
 _mAddFunctionPSO = [_mDevice newComputePipelineStateWithFunction: addFunction error:&error];
 ```
 
@@ -140,3 +138,53 @@ When you create a pipeline state object, the device object finishes compiling th
 > **Note**
 > All of the objects returned by Metal in the code you've seen so far are returned as objects that conform to protocols. Metal defines most GPU-specific objects using protocols to abstract away the underlying implementation classes, which may vary for different GPUs. Metal defines GPU-independent objects using classes. The reference documentation for any given Metal protocol make it clear whether you can implement that protocol in your app.
 
+###### Create a Command Queue
+
+To send work to the GPU, you need a command queue. Metal uses command queues to schedule commands. Create a command queue by asking the MTLDevice for one.
+
+```objective-c
+_mCommandQueue = [_mDevice newCommandQueue];
+```
+
+###### Create Data Buffers and Load Data
+
+After initializing the basic Metal objects, you load data for the GPU to execute. This task is less performance critical, but still useful to do early in your app's launch.
+
+A GPU can have its own dedicated memory, or it can share memory with the operating system. Metal and the operating system kernel need to perform additional work to let you store data in memory and make that data available to the GPU. Metal abstracts this memory management using *resource* objects. (MTLResource). A resource is an allocation of memory that the GPU can access when running commands. Use a MTLDevice to create resources for its GPU.
+
+The sample app creates three buffers and fills the first two with random data. The third buffer is where *add_arrays* will store its results.
+
+```objective-c
+_mBufferA = [_mDevice newBufferWithLength:bufferSize options:MTLResourceStorageModeShared];
+_mBufferB = [_mDevice newBufferWithLength:bufferSize options:MTLResourceStorageModeShared];
+_mBufferResult = [_mDevice newBufferWithLength:bufferSize options:MTLResourceStorageModeShared];
+
+[self generateRandomFloatData:_mBufferA];
+[self generateRandomFloatData:_mBufferB];
+```
+
+The resources in this sample are(MTLBuffer) objects, which are allocations of memory without a predefined format. Metal manages each buffer as an opaque collection of bytes. However, you specify the format when you use a buffer in a shader. This means that your shaders and your app need to agree on the format of any data being passed back and forth.
+
+When you allocate a buffer, you provide a storage mode to determine some of its performance characteristics and whether the CPU or GPU can access it. The sample app uses shared memory (storageModeShared), which both the CPU and GPU can access.
+
+To fill a buffer with random data, the app gets a pointer to the buffer's memory and write data to it on the CPU. The add_arrays function in Listing 2 declared its arguments as arrays of floating-point numbers, so you provide buffers in the same format:
+
+```objective-c
+- (void) generateRandomFloatData: (id<MTLBuffer>) buffer
+{
+    float* dataPtr = buffer.contents;
+
+    for (unsigned long index = 0; index < arrayLength; index++)
+    {
+        dataPtr[index] = (float)rand()/(float)(RAND_MAX);
+    }
+}
+```
+
+###### Create a Command Buffer
+
+Ask the command queue to create a command buffer.
+
+```objective-c
+id<MTLCommandBuffer> commandBuffer = [_mCommandQueue commandBuffer];
+```
