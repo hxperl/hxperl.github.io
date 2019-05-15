@@ -188,3 +188,16 @@ Ask the command queue to create a command buffer.
 ```objective-c
 id<MTLCommandBuffer> commandBuffer = [_mCommandQueue commandBuffer];
 ```
+
+###### Create a Command Encoder
+
+To write commands into a command buffer, you use a *command encoder* for the specific kind of commands you want to code. This sample creates a compute command encoder, which encodes a compute pass. A compute pass holds a list of commands that execute compute pipelines. Each compute command causes the GPU to create a grid of threads to execute on the GPU.
+
+```objective-c
+id<MTLComputeCommandEncoder> computeEncoder = [commandBuffer computeCommandEncoder];
+```
+
+To encode a command, you make a series of method calls on the encoder. Some methods set state information, like the pipeline state object (PSO) or the arguments to be passed to the pipeline. After you make those state changes, you encode a command to execute the pipeline. The encoder writes all of the state changes and command parameters into the command buffer.
+
+!(https://docs-assets.developer.apple.com/published/064ba03feb/1516649f-a760-4bae-bee5-9bb1996ff42e.png)
+
