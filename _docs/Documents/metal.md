@@ -36,4 +36,7 @@ The relationship between Metal apps and a GPU is that of a client-server pattern
 - You make requests by sending commands to the GPU.
 - After processing the commands, the GPU can notify your app when it's ready for more work.
 
-![]('https://docs-assets.developer.apple.com/published/861974e544/6411df7f-4f5c-46d6-9573-c2c6dd10fffb.png')
+**Figure 1** Client-server usage pattern when using Metal. 
+
+![Client-server usage pattern when using Metal](https://docs-assets.developer.apple.com/published/861974e544/6411df7f-4f5c-46d6-9573-c2c6dd10fffb.png)
+
