@@ -29,6 +29,7 @@
   - restfulapi
   - soap
   - rpc
+  - realm
   - mvc
   - mvp
   - mvvm
