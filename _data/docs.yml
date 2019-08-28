@@ -23,6 +23,7 @@
   - golang
   - elasticsearch
   - swift
+  - concurrency
   - rxswift
   - saas
   - iptables
