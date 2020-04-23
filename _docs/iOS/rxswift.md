@@ -1,6 +1,6 @@
 ---
 title: RxSwift
-permalink: /docs/rswfit/
+permalink: /docs/rxswfit/
 ---
 
 > 여기에 정리된 내용은 모두 RxSwift Reactive Programming with Swift - raywenderlich 책 내용을 기초로 합니다.

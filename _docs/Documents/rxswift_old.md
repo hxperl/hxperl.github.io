@@ -1,6 +1,6 @@
 ---
 title: RxSwift
-permalink: /docs/rxswift/
+permalink: /docs/rxswift_old/
 ---
 
 ### 1. Observables
